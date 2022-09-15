@@ -22,7 +22,7 @@ class PriceShould extends TestCase
      */
     public function allow_non_negative_numbers(): void
     {
-        $this->doesNotPerformAssertions();
+        $this->expectNotToPerformAssertions();
         $price = new Price(1);
     }
 }

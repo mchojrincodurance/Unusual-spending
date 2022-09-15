@@ -10,6 +10,9 @@ class Price
      */
     public function __construct(float $value)
     {
-        throw new NegativePriceException();
+        if ($value < 0) {
+
+            throw new NegativePriceException();
+        }
     }
 }
