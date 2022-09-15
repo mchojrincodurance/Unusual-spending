@@ -117,7 +117,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->clock = new Clock(new DateTimeImmutable());
+        $this->clock = new Clock();
         $this->paymentRepository = new PaymentRepository($this->clock);
         $this->emailSenderSpy = Mockery::spy(EmailSender::class);
         $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy, $this->clock);
