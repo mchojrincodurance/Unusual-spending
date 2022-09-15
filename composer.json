@@ -2,7 +2,8 @@
     "name": "mchojrin/katalyst-kickstart-php",
     "description": "A skeleton for php based solutions to https://katalyst.codurance.com/",
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "mockery/mockery": "~1.5.1"
     },
     "authors": [
         {
@@ -10,7 +11,9 @@
             "email": "mauro.chojrin@leewayweb.com"
         }
     ],
-    "require": {},
+    "require": {
+        "php": "^8.1"
+    },
     "autoload": {
         "psr-4": {
             "" : "src/"
