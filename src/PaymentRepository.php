@@ -16,6 +16,12 @@ class PaymentRepository
 
     public function getUserMonthlyPayments(UserId $userId, int $month): array
     {
-        return [];
+        return [
+            new Payment(
+                new Price(1.5),
+                new PaymentDescription("A payment"),
+                Category::Restaurants
+            ),
+        ];
     }
 }
