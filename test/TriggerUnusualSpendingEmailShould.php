@@ -6,17 +6,33 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 class TriggerUnusualSpendingEmailShould extends MockeryTestCase
 {
+    private Clock $clock;
+    private PaymentRepository $paymentRepository;
+
     /**
      * @test
      */
     public function send_emails(): void
     {
-        $clock = new Clock(new DateTimeImmutable());
+        $this->buildBaseScenario();
 
-        $paymentRepository = new PaymentRepository($clock);
+        $emailSender = Mockery::spy(EmailSender::class);
+        $triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($emailSender);
+        $triggerUnusualSpendingEmail->trigger(1);
+
+        $emailSender
+            ->shouldHaveReceived('send')
+            ->once();
+    }
+
+    /**
+     * @return void
+     */
+    public function buildBaseScenario(): void
+    {
         $userId = new UserId(1);
 
-        $paymentRepository
+        $this->paymentRepository
             ->addPayment(
                 $userId,
                 new Payment(
@@ -40,12 +56,11 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
                     new PaymentDescription("Movie ticket"),
                     Category::Entertainment
                 )
-            )
-        ;
+            );
 
-        $clock->nextMonth();
+        $this->clock->nextMonth();
 
-        $paymentRepository
+        $this->paymentRepository
             ->addPayment(
                 $userId,
                 new Payment(
@@ -69,15 +84,13 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
                     new PaymentDescription("Bike ride"),
                     Category::Entertainment
                 )
-            )
-        ;
+            );
+    }
 
-        $emailSender = Mockery::spy(EmailSender::class);
-        $triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($emailSender);
-        $triggerUnusualSpendingEmail->trigger(1);
-
-        $emailSender
-            ->shouldHaveReceived('send')
-            ->once();
+    protected function setUp() : void
+    {
+        parent::setUp();
+        $this->clock = new Clock(new DateTimeImmutable());
+        $this->paymentRepository = new PaymentRepository($this->clock);
     }
 }
