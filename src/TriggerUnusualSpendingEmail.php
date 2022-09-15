@@ -3,10 +3,12 @@
 class TriggerUnusualSpendingEmail {
 
     private EmailSender $emailSender;
+    private Clock $clock;
 
-    public function __construct(EmailSender $emailSender)
+    public function __construct(EmailSender $emailSender, Clock $clock)
     {
         $this->emailSender = $emailSender;
+        $this->clock = $clock;
     }
 
     public function trigger(int $userId): void

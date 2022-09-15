@@ -20,6 +20,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
      * @param float $secondMonthMultiplier
      * @test
      * @dataProvider dataProvider
+     * @throws NegativePriceException
      */
     public function sent_email_with_expected_body_and_subject(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
     {
@@ -52,6 +53,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
      * @param float $entertainmentSpend
      * @param float $secondMonthMultiplier
      * @return void
+     * @throws NegativePriceException
      */
     public function buildBaseScenario(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
     {
@@ -118,7 +120,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
         $this->clock = new Clock(new DateTimeImmutable());
         $this->paymentRepository = new PaymentRepository($this->clock);
         $this->emailSenderSpy = Mockery::spy(EmailSender::class);
-        $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy);
+        $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy, $this->clock);
     }
 
     private function buildExpectedBody(array $unusualExpenses): string
