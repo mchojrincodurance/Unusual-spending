@@ -40,6 +40,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
     {
         return [
             [ 20.7, 5.2, 2.5 ],
+            [ 15, 12, 3 ],
         ];
     }
 
