@@ -66,6 +66,6 @@ EOT
     {
         return $this
             ->paymentRepository
-            ->getUserMonthlyPayments($userId, $month);
+            ->getUserMonthlyPayments(new UserId($userId), $month);
     }
 }
