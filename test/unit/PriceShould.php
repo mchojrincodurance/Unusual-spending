@@ -29,12 +29,21 @@ class PriceShould extends TestCase
     /**
      * @test
      * @throws NegativePriceException
+     * @dataProvider valueProvider
      */
-    public function store_its_value(): void
+    public function store_its_value(float $value): void
     {
-        $value = 20;
         $price = new Price($value);
 
         $this->assertEquals($value, $price->getValue());
+    }
+
+    public function valueProvider(): array
+    {
+        return [
+            [ 10 ],
+            [ 20 ],
+            [ 30.9 ],
+        ];
     }
 }
