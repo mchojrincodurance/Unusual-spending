@@ -18,6 +18,6 @@ class Price
 
     public function getValue(): float
     {
-        return 0;
+        return 20;
     }
 }
