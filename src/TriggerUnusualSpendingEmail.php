@@ -13,6 +13,13 @@ class TriggerUnusualSpendingEmail {
 
     public function trigger(int $userId): void
     {
+        $currentMonthSpend = [];
+
+        foreach ($this->getCategories() as $category) {
+            $currentMonthSpend[$category] = $this->getCategoryMonthlySpendForUser($category, $userId, $this->getCurrentMonth());
+        }
+
+
         $this->emailSender->send(
             "Unusual spending of \$64.75 detected!",
             <<<EOT
@@ -28,5 +35,25 @@ Love,
 The Credit Card Company
 EOT
             );
+    }
+
+    private function getCategories(): array
+    {
+        return Category::cases();
+    }
+
+    private function getCategoryMonthlySpendForUser(Category $category, int $userId, int $month): float
+    {
+        return 0;
+    }
+
+    private function getCurrentMonth(): int
+    {
+        return $this->getClock()->getCurrentMonth();
+    }
+
+    private function getClock(): Clock
+    {
+        return $this->clock;
     }
 }
