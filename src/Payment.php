@@ -13,4 +13,12 @@ class Payment
     public function __construct(Price $price, PaymentDescription $description, Category $category)
     {
     }
+
+    /**
+     * @throws NegativePriceException
+     */
+    public function getPrice(): Price
+    {
+        return new Price(0);
+    }
 }
