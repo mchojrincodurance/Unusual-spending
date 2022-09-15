@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 class Price
 {
+    private float $value;
+
     /**
      * @param float $value
      * @throws NegativePriceException
@@ -14,10 +16,12 @@ class Price
 
             throw new NegativePriceException();
         }
+
+        $this->value = $value;
     }
 
     public function getValue(): float
     {
-        return 20;
+        return $this->value;
     }
 }
