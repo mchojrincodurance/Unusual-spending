@@ -44,7 +44,10 @@ EOT
 
     private function getCategoryMonthlySpendForUser(Category $category, int $userId, int $month): float
     {
-        return 0;
+        $userMonthlyPayments = $this->getUserMonthlyPayments($userId, $month);
+        $categoryPayments = array_filter($userMonthlyPayments, fn(Payment $payment) => $payment->getCategory() === $category);
+
+        return array_sum(array_map(fn(Payment $payment) => $payment->getPrice(), $categoryPayments));
     }
 
     private function getCurrentMonth(): int
@@ -55,5 +58,10 @@ EOT
     private function getClock(): Clock
     {
         return $this->clock;
+    }
+
+    private function getUserMonthlyPayments(int $userId, int $month) : array
+    {
+        return [];
     }
 }
