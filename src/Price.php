@@ -15,4 +15,9 @@ class Price
             throw new NegativePriceException();
         }
     }
+
+    public function getValue(): float
+    {
+        return 0;
+    }
 }

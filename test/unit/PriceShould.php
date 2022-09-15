@@ -25,4 +25,16 @@ class PriceShould extends TestCase
         $this->expectNotToPerformAssertions();
         $price = new Price(1);
     }
+
+    /**
+     * @test
+     * @throws NegativePriceException
+     */
+    public function store_its_value(): void
+    {
+        $value = 20;
+        $price = new Price($value);
+
+        $this->assertEquals($value, $price->getValue());
+    }
 }
