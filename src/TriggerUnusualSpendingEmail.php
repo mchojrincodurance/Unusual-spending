@@ -19,6 +19,7 @@ Hello card user!
 We have detected unusually high spending on your card in these categories:
 
 * You spent $100.00 on restaurants
+* You spent $18.20 on entertainment
 
 Love,
 

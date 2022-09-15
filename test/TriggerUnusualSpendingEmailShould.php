@@ -16,12 +16,17 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
      */
     public function sent_email_with_expected_body_and_subject(): void
     {
+        $this->buildBaseScenario();
+
         $this->triggerUnusualSpendingEmail->trigger(1);
 
         $this->emailSenderSpy
             ->shouldHaveReceived('send', [
-                    $this->buildExpectedSubject(),
-                    $this->buildExpectedBody()
+                    $this->buildExpectedSubject(118.2),
+                    $this->buildExpectedBody([
+                        Category::Restaurants->name => 100,
+                        Category::Entertainment->name => 18.2,
+                    ])
                 ]
             )
             ->once();
@@ -98,23 +103,28 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
         $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy);
     }
 
-    private function buildExpectedBody(): string
+    private function buildExpectedBody(array $unusualExpenses): string
     {
-        return <<<EOT
+        $return = <<<EOT
 Hello card user!
 
 We have detected unusually high spending on your card in these categories:
+EOT;
+        foreach ($unusualExpenses as $category => $spend) {
+            $return .= "* You spent \$" . number_format($spend, 2) . " on $category" . PHP_EOL;
+        }
 
-* You spent $100.00 on restaurants
-
+        $return .= <<<EOT
 Love,
 
 The Credit Card Company
 EOT;
+
+        return $return;
     }
 
-    private function buildExpectedSubject(): string
+    private function buildExpectedSubject(float $totalUnusualSpend): string
     {
-        return "Unusual spending of $118.20 detected!";
+        return "Unusual spending of \$" . number_format($totalUnusualSpend, 2) . " detected!";
     }
 }
