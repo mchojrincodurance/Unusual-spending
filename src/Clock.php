@@ -13,4 +13,9 @@ class Clock
     {
 
     }
+
+    public function getCurrentMonth(): int
+    {
+        return 0;
+    }
 }
