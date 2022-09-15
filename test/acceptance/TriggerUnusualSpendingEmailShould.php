@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * @todo Add a test to check that only categories with over spend are included in the email
+ */
 class TriggerUnusualSpendingEmailShould extends MockeryTestCase
 {
     private Clock $clock;
@@ -39,8 +42,8 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
     public function dataProvider(): array
     {
         return [
-            [ 20.7, 5.2, 2.5 ],
-            [ 15, 12, 3 ],
+            [20.7, 5.2, 2.5],
+            [15, 12, 3],
         ];
     }
 
