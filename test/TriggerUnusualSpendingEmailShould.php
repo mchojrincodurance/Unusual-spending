@@ -72,11 +72,12 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             )
         ;
 
-        $emailSender = Mockery::mock('EmailSender');
-        $emailSender->shouldReceive('send')
-            ->once();
-
-        $triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail();
+        $emailSender = Mockery::spy(EmailSender::class);
+        $triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($emailSender);
         $triggerUnusualSpendingEmail->trigger(1);
+
+        $emailSender
+            ->shouldHaveReceived('send')
+            ->once();
     }
 }
