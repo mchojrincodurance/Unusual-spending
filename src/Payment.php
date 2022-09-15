@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class Payment
 {
+    private Price $price;
 
     /**
      * @param Price $price
@@ -12,13 +13,13 @@ class Payment
      */
     public function __construct(Price $price, PaymentDescription $description, Category $category)
     {
+        $this->price = $price;
     }
 
     /**
-     * @throws NegativePriceException
      */
     public function getPrice(): Price
     {
-        return new Price(0);
+        return $this->price;
     }
 }
