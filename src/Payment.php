@@ -16,10 +16,8 @@ class Payment
         $this->price = $price;
     }
 
-    /**
-     */
-    public function getPrice(): Price
+    public function getValue(): float
     {
-        return $this->price;
+        return $this->price->getValue();
     }
 }

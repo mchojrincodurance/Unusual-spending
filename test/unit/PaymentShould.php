@@ -12,8 +12,9 @@ class PaymentShould extends TestCase
      */
     public function store_the_price(): void
     {
-        $price = new Price(10);
+        $value = 10.0;
+        $price = new Price($value);
         $payment = new Payment($price, new PaymentDescription("Description"), Category::Entertainment);
-        $this->assertSame($price, $payment->getPrice());
+        $this->assertSame($value, $payment->getValue());
     }
 }
