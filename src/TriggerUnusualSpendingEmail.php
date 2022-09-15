@@ -47,7 +47,7 @@ EOT
         $userMonthlyPayments = $this->getUserMonthlyPayments($userId, $month);
         $categoryPayments = array_filter($userMonthlyPayments, fn(Payment $payment) => $payment->getCategory() === $category);
 
-        return array_sum(array_map(fn(Payment $payment) => $payment->getPrice(), $categoryPayments));
+        return array_sum(array_map(fn(Payment $payment) => $payment->getPrice()->getValue(), $categoryPayments));
     }
 
     private function getCurrentMonth(): int
