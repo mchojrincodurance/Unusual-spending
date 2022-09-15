@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 class UserId
 {
+    private int $value;
 
     /**
      * @param int $value
      */
     public function __construct(int $value)
     {
+        $this->value = $value;
+    }
+
+    public function getValue(): int
+    {
+        return $this->value;
     }
 }
