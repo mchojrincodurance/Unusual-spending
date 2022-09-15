@@ -12,30 +12,44 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
     private TriggerUnusualSpendingEmail $triggerUnusualSpendingEmail;
 
     /**
+     * @param float $restaurantSpend
+     * @param float $entertainmentSpend
+     * @param float $secondMonthMultiplier
      * @test
+     * @dataProvider dataProvider
      */
-    public function sent_email_with_expected_body_and_subject(): void
+    public function sent_email_with_expected_body_and_subject(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
     {
-        $this->buildBaseScenario();
+        $this->buildBaseScenario($restaurantSpend, $entertainmentSpend, $secondMonthMultiplier);
 
         $this->triggerUnusualSpendingEmail->trigger(1);
 
         $this->emailSenderSpy
             ->shouldHaveReceived('send', [
-                    $this->buildExpectedSubject(118.2),
+                    $this->buildExpectedSubject(($restaurantSpend + $entertainmentSpend) * $secondMonthMultiplier),
                     $this->buildExpectedBody([
-                        Category::Restaurants->name => 100,
-                        Category::Entertainment->name => 18.2,
+                        Category::Restaurants->name => $restaurantSpend * $secondMonthMultiplier,
+                        Category::Entertainment->name => $entertainmentSpend * $secondMonthMultiplier,
                     ])
                 ]
             )
             ->once();
     }
 
+    public function dataProvider(): array
+    {
+        return [
+            [ 20.7, 5.2, 2.5 ],
+        ];
+    }
+
     /**
+     * @param float $restaurantSpend
+     * @param float $entertainmentSpend
+     * @param float $secondMonthMultiplier
      * @return void
      */
-    public function buildBaseScenario(): void
+    public function buildBaseScenario(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
     {
         $userId = new UserId(1);
 
@@ -51,7 +65,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             ->addPayment(
                 $userId,
                 new Payment(
-                    new Price(20.70),
+                    new Price($restaurantSpend),
                     new PaymentDescription("Dinner with the wife"),
                     Category::Restaurants
                 )
@@ -59,7 +73,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             ->addPayment(
                 $userId,
                 new Payment(
-                    new Price(5.20),
+                    new Price($entertainmentSpend),
                     new PaymentDescription("Movie ticket"),
                     Category::Entertainment
                 )
@@ -79,7 +93,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             ->addPayment(
                 $userId,
                 new Payment(
-                    new Price(100.00),
+                    new Price($restaurantSpend * $secondMonthMultiplier),
                     new PaymentDescription("Dinner with friends"),
                     Category::Restaurants
                 )
@@ -87,7 +101,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             ->addPayment(
                 $userId,
                 new Payment(
-                    new Price(18.20),
+                    new Price($entertainmentSpend * $secondMonthMultiplier),
                     new PaymentDescription("Bike ride"),
                     Category::Entertainment
                 )
@@ -109,12 +123,15 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
 Hello card user!
 
 We have detected unusually high spending on your card in these categories:
+
+
 EOT;
         foreach ($unusualExpenses as $category => $spend) {
             $return .= "* You spent \$" . number_format($spend, 2) . " on $category" . PHP_EOL;
         }
 
         $return .= <<<EOT
+
 Love,
 
 The Credit Card Company
