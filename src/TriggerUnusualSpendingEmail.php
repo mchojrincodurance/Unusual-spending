@@ -1,6 +1,7 @@
 <?php
 
-class TriggerUnusualSpendingEmail {
+class TriggerUnusualSpendingEmail
+{
 
     private EmailSender $emailSender;
     private Clock $clock;
@@ -15,28 +16,18 @@ class TriggerUnusualSpendingEmail {
 
     public function trigger(int $userId): void
     {
-        $currentMonthSpend = [];
+        $lastMonthSpend = $this->calculateMonthlySpend($userId, $this->getCurrentMonth() - 1);
+        $currentMonthSpend = $this->calculateMonthlySpend($userId, $this->getCurrentMonth());
 
-        foreach ($this->getCategories() as $category) {
-            $currentMonthSpend[$category->name] = $this->getCategoryMonthlySpendForUser($category, $userId, $this->getCurrentMonth());
+        $unusualSpending = [];
+
+        foreach ($currentMonthSpend as $category => $spend) {
+            if (array_key_exists($category, $lastMonthSpend) && $lastMonthSpend[$category] < $spend / 2) {
+                $unusualSpending[$category] = $spend;
+            }
         }
 
-
-        $this->emailSender->send(
-            "Unusual spending of \$64.75 detected!",
-            <<<EOT
-Hello card user!
-
-We have detected unusually high spending on your card in these categories:
-
-* You spent $51.75 on Restaurants
-* You spent $13.00 on Entertainment
-
-Love,
-
-The Credit Card Company
-EOT
-            );
+        $this->sendUnusualSpendingEmail($unusualSpending);
     }
 
     private function getCategories(): array
@@ -46,8 +37,10 @@ EOT
 
     private function getCategoryMonthlySpendForUser(Category $category, int $userId, int $month): float
     {
-        $userMonthlyPayments = $this->getUserMonthlyPayments($userId, $month);
-        $categoryPayments = array_filter($userMonthlyPayments, fn(Payment $payment) => $payment->getCategory() === $category);
+        $categoryPayments = array_filter(
+            $this->getUserMonthlyPayments($userId, $month),
+            fn(Payment $payment) => $payment->getCategory() === $category
+        );
 
         return array_sum(array_map(fn(Payment $payment) => $payment->getValue(), $categoryPayments));
     }
@@ -62,10 +55,55 @@ EOT
         return $this->clock;
     }
 
-    private function getUserMonthlyPayments(int $userId, int $month) : array
+    private function getUserMonthlyPayments(int $userId, int $month): array
     {
         return $this
             ->paymentRepository
             ->getUserMonthlyPayments(new UserId($userId), $month);
+    }
+
+    /**
+     * @param int $userId
+     * @param int $month
+     * @return array
+     */
+    public function calculateMonthlySpend(int $userId, int $month): array
+    {
+        $monthlySpend = [];
+
+        foreach ($this->getCategories() as $category) {
+            $monthlySpend[$category->name] = $this->getCategoryMonthlySpendForUser($category, $userId, $month);
+        }
+
+        return $monthlySpend;
+    }
+
+    /**
+     * @param array $unusualSpending
+     * @return void
+     */
+    public function sendUnusualSpendingEmail(array $unusualSpending): void
+    {
+        $totalUnusualSpending = array_sum($unusualSpending);
+
+        $body = "Hello card user!
+
+We have detected unusually high spending on your card in these categories:
+
+";
+
+        foreach ($unusualSpending as $category => $spend) {
+            $body .= "* You spent \$" . number_format($spend, 2) . " on $category" . PHP_EOL;
+        }
+
+        $body .= "Love,
+
+The Credit Card Company
+        ";
+
+        $this->emailSender->send(
+            "Unusual spending of \$$totalUnusualSpending detected!",
+            $body
+        );
     }
 }
