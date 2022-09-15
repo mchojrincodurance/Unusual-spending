@@ -4,11 +4,13 @@ class TriggerUnusualSpendingEmail {
 
     private EmailSender $emailSender;
     private Clock $clock;
+    private PaymentRepository $paymentRepository;
 
-    public function __construct(EmailSender $emailSender, Clock $clock)
+    public function __construct(EmailSender $emailSender, Clock $clock, PaymentRepository $paymentRepository)
     {
         $this->emailSender = $emailSender;
         $this->clock = $clock;
+        $this->paymentRepository = $paymentRepository;
     }
 
     public function trigger(int $userId): void
@@ -62,6 +64,8 @@ EOT
 
     private function getUserMonthlyPayments(int $userId, int $month) : array
     {
-        return [];
+        return $this
+            ->paymentRepository
+            ->getUserMonthlyPayments($userId, $month);
     }
 }
