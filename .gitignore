@@ -2,3 +2,4 @@ vendor/*
 composer.phar
 phpunit
 .idea/*
+/.phpunit.result.cache
