@@ -3,7 +3,7 @@
 class EmailSender
 {
 
-    public function send(): void
+    public function send(string $subject, string $body): void
     {
     }
 }
