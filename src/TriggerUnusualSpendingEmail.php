@@ -18,7 +18,7 @@ class TriggerUnusualSpendingEmail {
         $currentMonthSpend = [];
 
         foreach ($this->getCategories() as $category) {
-            $currentMonthSpend[$category] = $this->getCategoryMonthlySpendForUser($category, $userId, $this->getCurrentMonth());
+            $currentMonthSpend[$category->name] = $this->getCategoryMonthlySpendForUser($category, $userId, $this->getCurrentMonth());
         }
 
 
