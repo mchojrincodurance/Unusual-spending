@@ -13,4 +13,9 @@ class PaymentRepository
     {
         return $this;
     }
+
+    public function getUserMonthlyPayments(UserId $userId, int $month): array
+    {
+        return [];
+    }
 }
