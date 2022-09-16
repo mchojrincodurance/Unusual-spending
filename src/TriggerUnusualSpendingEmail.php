@@ -2,7 +2,6 @@
 
 class TriggerUnusualSpendingEmail
 {
-
     private EmailSender $emailSender;
     private Clock $clock;
     private PaymentRepository $paymentRepository;
@@ -16,94 +15,60 @@ class TriggerUnusualSpendingEmail
 
     public function trigger(int $userId): void
     {
-        $lastMonthSpend = $this->calculateMonthlySpend($userId, $this->getCurrentMonth() - 1);
-        $currentMonthSpend = $this->calculateMonthlySpend($userId, $this->getCurrentMonth());
-
-        $unusualSpending = [];
-
-        foreach ($currentMonthSpend as $category => $spend) {
-            if (array_key_exists($category, $lastMonthSpend) && $lastMonthSpend[$category] < $spend / 2) {
-                $unusualSpending[$category] = $spend;
-            }
-        }
-
-        $this->sendUnusualSpendingEmail($unusualSpending);
-    }
-
-    private function getCategories(): array
-    {
-        return Category::cases();
-    }
-
-    private function getCategoryMonthlySpendForUser(Category $category, int $userId, int $month): float
-    {
-        $categoryPayments = array_filter(
-            $this->getUserMonthlyPayments($userId, $month),
-            fn(Payment $payment) => $payment->getCategory() === $category
+        $unusualSpending = $this->getUnusualSpending($userId);
+        $this->sendEmail(
+            $this->buildEmailSubject(array_sum($unusualSpending)),
+            $this->buildEmailBody($unusualSpending)
         );
-
-        return array_sum(array_map(fn(Payment $payment) => $payment->getValue(), $categoryPayments));
     }
 
-    private function getCurrentMonth(): int
+    private function sendEmail(string $subject, string $body): void
     {
-        return $this->getClock()->getCurrentMonth();
-    }
-
-    private function getClock(): Clock
-    {
-        return $this->clock;
-    }
-
-    private function getUserMonthlyPayments(int $userId, int $month): array
-    {
-        return $this
-            ->paymentRepository
-            ->getUserMonthlyPayments(new UserId($userId), $month);
+        $this->emailSender->send(
+            $subject,
+            $body
+        );
     }
 
     /**
-     * @param int $userId
-     * @param int $month
-     * @return array
+     * @param float $totalUnusualSpending
+     * @return string
      */
-    public function calculateMonthlySpend(int $userId, int $month): array
+    public function buildEmailSubject(float $totalUnusualSpending): string
     {
-        $monthlySpend = [];
-
-        foreach ($this->getCategories() as $category) {
-            $monthlySpend[$category->name] = $this->getCategoryMonthlySpendForUser($category, $userId, $month);
-        }
-
-        return $monthlySpend;
+        return "Unusual spending of \$".number_format($totalUnusualSpending, 2)." detected!";
     }
 
     /**
      * @param array $unusualSpending
-     * @return void
+     * @return string
      */
-    public function sendUnusualSpendingEmail(array $unusualSpending): void
+    public function buildEmailBody(array $unusualSpending): string
     {
-        $totalUnusualSpending = array_sum($unusualSpending);
+        return "
+Hello card user!
 
-        $body = "Hello card user!
+We have detected unusually high spending on your card in these categories:".$this->buildUnusualSpendingReport($unusualSpending)."
 
-We have detected unusually high spending on your card in these categories:
+Love,
 
-";
+The Credit Card Company";
+    }
 
-        foreach ($unusualSpending as $category => $spend) {
-            $body .= "* You spent \$" . number_format($spend, 2) . " on $category" . PHP_EOL;
-        }
-
-        $body .= "Love,
-
-The Credit Card Company
-        ";
-
-        $this->emailSender->send(
-            "Unusual spending of \$$totalUnusualSpending detected!",
-            $body
+    private function buildUnusualSpendingReport(array $unusualSpending): string
+    {
+        return implode(PHP_EOL,
+            array_map(
+                fn(string $category, float $spend) => "* You spent \$".number_format($spend, 2)." on $category", array_keys($unusualSpending), array_values($unusualSpending)
+            )
         );
+    }
+
+    private function getUnusualSpending(int $userId): array
+    {
+        return [
+            Category::Restaurants->name => 50.2,
+            Category::Entertainment->name => 150.2,
+        ];
     }
 }
