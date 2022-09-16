@@ -5,12 +5,12 @@ declare(strict_types=1);
 class UnusualSpendingCalculator
 {
     private PaymentRepository $paymentRepository;
-    private int $unsualSpendMultiplier;
+    private int $unusualSpendMultiplier;
 
-    public function __construct(PaymentRepository $paymentRepository, int $unsualSpendMultiplier)
+    public function __construct(PaymentRepository $paymentRepository, int $unusualSpendMultiplier)
     {
         $this->paymentRepository = $paymentRepository;
-        $this->unsualSpendMultiplier = $unsualSpendMultiplier;
+        $this->unusualSpendMultiplier = $unusualSpendMultiplier;
     }
 
     public function getUnusualSpending(UserId $userId, int $currentMonth, int $previousMonth): array
@@ -72,6 +72,6 @@ class UnusualSpendingCalculator
      */
     public function isUnusual($previousTotalSpend, mixed $spend): bool
     {
-        return $spend >= $previousTotalSpend * $this->unsualSpendMultiplier;
+        return $spend >= $previousTotalSpend * $this->unusualSpendMultiplier;
     }
 }
