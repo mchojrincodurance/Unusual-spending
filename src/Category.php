@@ -1,8 +1,8 @@
 <?php
 
-enum Category
+enum Category: string
 {
-    case Golf;
-    case Entertainment;
-    case Restaurants;
+    case Golf = "Golf";
+    case Entertainment = "Entertainment";
+    case Restaurants = "Restaurants";
 }

@@ -36,6 +36,16 @@ class UnusualSpendingCalculatorShould extends TestCase
      */
     private function buildInitialScenario(array $firstMonthSpend, array $secondMonthSpend): void
     {
+        $paymentsMade = [];
+
+        foreach ($firstMonthSpend as $category => $spend) {
+            $paymentsMade = new Payment(
+                new Price($spend),
+                new PaymentDescription("A payment"),
+                Category::tryFrom($category)
+            );
+        }
+
         $this
             ->paymentRepository
             ->shouldReceive('getUserMonthlyPayments')
@@ -44,23 +54,7 @@ class UnusualSpendingCalculatorShould extends TestCase
                 $this->userId,
                 0
             ])
-            ->andReturn([
-                new Payment(
-                    new Price($firstMonthSpend[Category::Restaurants->name]),
-                    new PaymentDescription("A nice dinner"),
-                    Category::Restaurants
-                ),
-                new Payment(
-                    new Price($firstMonthSpend[Category::Entertainment->name]),
-                    new PaymentDescription("A horse back ride"),
-                    Category::Entertainment
-                ),
-                new Payment(
-                    new Price($firstMonthSpend[Category::Golf->name]),
-                    new PaymentDescription("A Golf class"),
-                    Category::Golf
-                ),
-            ])
+            ->andReturn($paymentsMade)
             ->shouldReceive('getUserMonthlyPayments')
             ->once()
             ->withArgs([
