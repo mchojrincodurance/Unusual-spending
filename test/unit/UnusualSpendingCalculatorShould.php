@@ -10,26 +10,32 @@ class UnusualSpendingCalculatorShould extends TestCase
     private UserId $userId;
 
     /**
+     * @param array $firstMonthSpend
+     * @param array $secondMonthSpend
+     * @param array $expectedResult
      * @test
+     * @throws NegativePriceException
+     * @dataProvider spendProvider
      */
-    public function return_every_spend_above_threshold(): void
+    public function return_every_spend_above_threshold(array $firstMonthSpend, array $secondMonthSpend, array $expectedResult): void
     {
+        $this->buildInitialScenario($firstMonthSpend, $secondMonthSpend);
+
         $unusualSpendingCalculator = new UnusualSpendingCalculator();
         $this->assertEquals(
-            [
-                Category::Restaurants->name => 25,
-                Category::Entertainment->name => 150,
-            ],
+            $expectedResult,
             $unusualSpendingCalculator->getUnusualSpending(1, 1, 0));
     }
 
     /**
+     * @param array $firstMonthSpend
+     * @param array $secondMonthSpend
+     * @return void
      * @throws NegativePriceException
+     * @dataProvider spendProvider
      */
-    protected function setUp(): void
+    private function buildInitialScenario(array $firstMonthSpend, array $secondMonthSpend): void
     {
-        $this->userId = new UserId(1);
-        $this->paymentRepository = Mockery::mock(PaymentRepository::class);
         $this
             ->paymentRepository
             ->shouldReceive('getUserMonthlyPayments')
@@ -40,17 +46,17 @@ class UnusualSpendingCalculatorShould extends TestCase
             ])
             ->andReturn([
                 new Payment(
-                    new Price(10),
+                    new Price($firstMonthSpend[Category::Restaurants->name]),
                     new PaymentDescription("A nice dinner"),
                     Category::Restaurants
                 ),
                 new Payment(
-                    new Price(50),
+                    new Price($firstMonthSpend[Category::Entertainment->name]),
                     new PaymentDescription("A horse back ride"),
                     Category::Entertainment
                 ),
                 new Payment(
-                    new Price(30),
+                    new Price($firstMonthSpend[Category::Golf->name]),
                     new PaymentDescription("A Golf class"),
                     Category::Golf
                 ),
@@ -63,21 +69,51 @@ class UnusualSpendingCalculatorShould extends TestCase
             ])
             ->andReturn([
                 new Payment(
-                    new Price(25),
+                    new Price($secondMonthSpend[Category::Restaurants->name]),
                     new PaymentDescription("A very nice dinner"),
                     Category::Restaurants
                 ),
                 new Payment(
-                    new Price(150),
+                    new Price($secondMonthSpend[Category::Entertainment->name]),
                     new PaymentDescription("Swimming with dolphins"),
                     Category::Entertainment
                 ),
                 new Payment(
-                    new Price(30),
+                    new Price($secondMonthSpend[Category::Golf->name]),
                     new PaymentDescription("A Golf class"),
                     Category::Golf
                 ),
-            ])
-        ;
+            ]);
+    }
+
+    /**
+     */
+    protected function setUp(): void
+    {
+        $this->userId = new UserId(1);
+        $this->paymentRepository = Mockery::mock(PaymentRepository::class);
+    }
+
+    private function spendProvider(): array
+    {
+        return
+            [
+                [
+                    [
+                        Category::Restaurants->name => 10,
+                        Category::Entertainment->name => 20,
+                        Category::Golf->name => 30,
+                    ],
+                    [
+                        Category::Restaurants->name => 30,
+                        Category::Entertainment->name => 50,
+                        Category::Golf->name => 30,
+                    ],
+                    [
+                        Category::Restaurants->name => 30,
+                        Category::Entertainment->name => 50,
+                    ]
+                ]
+            ];
     }
 }
