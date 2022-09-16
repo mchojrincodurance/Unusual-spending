@@ -117,6 +117,21 @@ class UnusualSpendingCalculatorShould extends TestCase
                         Category::Restaurants->name => 30,
                         Category::Entertainment->name => 50,
                     ]
+                ],
+                [
+                    [
+                        Category::Entertainment->name => 20,
+                        Category::Golf->name => 30,
+                    ],
+                    [
+                        Category::Restaurants->name => 30,
+                        Category::Entertainment->name => 50,
+                        Category::Golf->name => 30,
+                    ],
+                    [
+                        Category::Restaurants->name => 30,
+                        Category::Entertainment->name => 50,
+                    ]
                 ]
             ];
     }
