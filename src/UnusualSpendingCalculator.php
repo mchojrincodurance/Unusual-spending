@@ -15,10 +15,10 @@ class UnusualSpendingCalculator
 
     public function getUnusualSpending(UserId $userId, int $currentMonth, int $previousMonth): array
     {
-        $currentMonthPayments = $this->getUserMonthlyPayments($userId, $currentMonth);
-        $previousMonthPayments = $this->getUserMonthlyPayments($userId, $previousMonth);
-
-        return $this->buildUnusualSpending($currentMonthPayments, $previousMonthPayments);
+        return $this->getUnusualSpends(
+            $this->getTotalSpend($this->getUserMonthlyPayments($userId, $currentMonth)),
+            $this->getTotalSpend($this->getUserMonthlyPayments($userId, $previousMonth))
+        );
     }
 
     private function getUserMonthlyPayments(UserId $userId, int $month): array
@@ -26,52 +26,56 @@ class UnusualSpendingCalculator
         return $this->paymentRepository->getUserMonthlyPayments($userId, $month);
     }
 
-    private function buildUnusualSpending(array $currentMonthPayments, array $previousMonthPayments): array
-    {
-        $currentTotalSpend = $this->getTotalSpend($currentMonthPayments);
-        $previousTotalSpend = $this->getTotalSpend($previousMonthPayments);
-
-        $unusualSpending = [];
-
-        foreach ($currentTotalSpend as $category => $spend) {
-            if ($this->isUnusual($previousTotalSpend[$category], $spend)) {
-                $unusualSpending[$category] = $spend;
-            }
-        }
-
-        return $unusualSpending;
-    }
-
     /**
      * @param array $currentMonthPayments
      * @return array
      */
-    public function getTotalSpend(array $currentMonthPayments): array
+    private function getTotalSpend(array $currentMonthPayments): array
     {
         $currentTotalSpend = [];
 
         foreach (Category::cases() as $category) {
-            $currentTotalSpend[$category->name] = array_sum(
-                array_map(
-                    fn(Payment $payment) => $payment->getValue(),
-                    array_filter(
-                        $currentMonthPayments,
-                        fn(Payment $payment) => $payment->getCategory() === $category
-                    )
-                )
-            );
+            $currentTotalSpend[$category->name] = $this->getTotalSpendByCategory($currentMonthPayments, $category);
         }
 
         return $currentTotalSpend;
     }
 
     /**
-     * @param $previousTotalSpend
-     * @param mixed $spend
+     * @param array $currentTotalSpend
+     * @param array $previousTotalSpend
+     * @return array
+     */
+    private function getUnusualSpends(array $currentTotalSpend, array $previousTotalSpend): array
+    {
+        return array_filter($currentTotalSpend, fn($spend, $category) => $this->isUnusual($previousTotalSpend[$category], $spend), ARRAY_FILTER_USE_BOTH );
+    }
+
+    /**
+     * @param float $previousTotalSpend
+     * @param float $spend
      * @return bool
      */
-    public function isUnusual($previousTotalSpend, mixed $spend): bool
+    private function isUnusual(float $previousTotalSpend, float $spend): bool
     {
         return $spend >= $previousTotalSpend * $this->unusualSpendMultiplier;
+    }
+
+    /**
+     * @param array $currentMonthPayments
+     * @param Category $category
+     * @return float
+     */
+    public function getTotalSpendByCategory(array $currentMonthPayments, Category $category): float
+    {
+        return array_sum(
+            array_map(
+                fn(Payment $payment) => $payment->getValue(),
+                array_filter(
+                    $currentMonthPayments,
+                    fn(Payment $payment) => $payment->getCategory() === $category
+                )
+            )
+        );
     }
 }
