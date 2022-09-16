@@ -42,7 +42,7 @@ class UnusualSpendingCalculatorShould extends TestCase
             $paymentsMade[] = new Payment(
                 new Price($spend),
                 new PaymentDescription("A payment"),
-                Category::tryFrom($category)
+                Category::from($category)
             );
         }
 
