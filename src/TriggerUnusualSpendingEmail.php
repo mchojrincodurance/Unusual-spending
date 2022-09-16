@@ -16,52 +16,7 @@ class TriggerUnusualSpendingEmail
     public function trigger(int $userId): void
     {
         $unusualSpending = $this->getUnusualSpending(new UserId($userId));
-        $this->sendEmail(
-            $this->buildEmailSubject(array_sum($unusualSpending)),
-            $this->buildEmailBody($unusualSpending)
-        );
-    }
-
-    private function sendEmail(string $subject, string $body): void
-    {
-        $this->emailSender->send(
-            $subject,
-            $body
-        );
-    }
-
-    /**
-     * @param float $totalUnusualSpending
-     * @return string
-     */
-    public function buildEmailSubject(float $totalUnusualSpending): string
-    {
-        return "Unusual spending of \$".number_format($totalUnusualSpending, 2)." detected!";
-    }
-
-    /**
-     * @param array $unusualSpending
-     * @return string
-     */
-    public function buildEmailBody(array $unusualSpending): string
-    {
-        return "
-Hello card user!
-
-We have detected unusually high spending on your card in these categories:".$this->buildUnusualSpendingReport($unusualSpending)."
-
-Love,
-
-The Credit Card Company";
-    }
-
-    private function buildUnusualSpendingReport(array $unusualSpending): string
-    {
-        return implode(PHP_EOL,
-            array_map(
-                fn(string $category, float $spend) => "* You spent \$".number_format($spend, 2)." on $category", array_keys($unusualSpending), array_values($unusualSpending)
-            )
-        );
+        $this->sendReport(array_sum($unusualSpending), $unusualSpending);
     }
 
     private function getUnusualSpending(UserId $userId): array
@@ -83,5 +38,10 @@ The Credit Card Company";
     private function getPreviousMonth(): int
     {
         return $this->clock->getPreviousMonth();
+    }
+
+    private function sendReport(float $totalUnusualSpend, array $detailedUnusualSpending): void
+    {
+        $this->emailSender->sendReport($totalUnusualSpend, $detailedUnusualSpending);
     }
 }

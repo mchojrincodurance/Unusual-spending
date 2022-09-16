@@ -30,12 +30,14 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
         $this->triggerUnusualSpendingEmail->trigger(1);
 
         $this->emailSenderSpy
-            ->shouldHaveReceived('send', [
-                    $this->buildExpectedSubject(($restaurantSpend + $entertainmentSpend) * $secondMonthMultiplier),
-                    $this->buildExpectedBody([
+            ->shouldHaveReceived(
+                'sendReport',
+                [
+                    ($restaurantSpend + $entertainmentSpend) * $secondMonthMultiplier,
+                    [
                         Category::Restaurants->name => $restaurantSpend * $secondMonthMultiplier,
                         Category::Entertainment->name => $entertainmentSpend * $secondMonthMultiplier,
-                    ])
+                    ]
                 ]
             )
             ->once();
@@ -48,7 +50,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
      * @return void
      * @throws NegativePriceException
      */
-    public function buildBaseScenario(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
+    private function buildBaseScenario(float $restaurantSpend, float $entertainmentSpend, float $secondMonthMultiplier): void
     {
         $userId = new UserId(1);
 
@@ -123,33 +125,5 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
         $this->emailSenderSpy = Mockery::spy(EmailSender::class);
         $this->unusualSpendingCalculator = new UnusualSpendingCalculator($this->paymentRepository, 2);
         $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy, $this->clock, $this->unusualSpendingCalculator);
-    }
-
-    private function buildExpectedBody(array $unusualExpenses): string
-    {
-        $return = <<<EOT
-Hello card user!
-
-We have detected unusually high spending on your card in these categories:
-
-
-EOT;
-        foreach ($unusualExpenses as $category => $spend) {
-            $return .= "* You spent \$" . number_format($spend, 2) . " on $category" . PHP_EOL;
-        }
-
-        $return .= <<<EOT
-
-Love,
-
-The Credit Card Company
-EOT;
-
-        return $return;
-    }
-
-    private function buildExpectedSubject(float $totalUnusualSpend): string
-    {
-        return "Unusual spending of \$" . number_format($totalUnusualSpend, 2) . " detected!";
     }
 }
