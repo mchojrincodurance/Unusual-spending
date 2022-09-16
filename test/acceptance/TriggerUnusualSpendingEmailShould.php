@@ -12,6 +12,7 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
     private Clock $clock;
     private PaymentRepository $paymentRepository;
     private EmailSender $emailSenderSpy;
+    private UnusualSpendingCalculator $unusualSpendingCalculator;
     private TriggerUnusualSpendingEmail $triggerUnusualSpendingEmail;
 
     /**
@@ -38,14 +39,6 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
                 ]
             )
             ->once();
-    }
-
-    public function dataProvider(): array
-    {
-        return [
-            [20.7, 5.2, 2.5],
-            [15, 12, 3],
-        ];
     }
 
     /**
@@ -114,13 +107,22 @@ class TriggerUnusualSpendingEmailShould extends MockeryTestCase
             );
     }
 
+    public function dataProvider(): array
+    {
+        return [
+            [20.7, 5.2, 2.5],
+            [15, 12, 3],
+        ];
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->clock = new Clock();
         $this->paymentRepository = new PaymentRepository($this->clock);
         $this->emailSenderSpy = Mockery::spy(EmailSender::class);
-        $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy, $this->clock, $this->paymentRepository);
+        $this->unusualSpendingCalculator = new UnusualSpendingCalculator($this->paymentRepository, 2);
+        $this->triggerUnusualSpendingEmail = new TriggerUnusualSpendingEmail($this->emailSenderSpy, $this->clock, $this->unusualSpendingCalculator);
     }
 
     private function buildExpectedBody(array $unusualExpenses): string

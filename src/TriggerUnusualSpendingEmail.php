@@ -4,13 +4,13 @@ class TriggerUnusualSpendingEmail
 {
     private EmailSender $emailSender;
     private Clock $clock;
-    private PaymentRepository $paymentRepository;
+    private UnusualSpendingCalculator $unusualSpendingCalculator;
 
-    public function __construct(EmailSender $emailSender, Clock $clock, PaymentRepository $paymentRepository)
+    public function __construct(EmailSender $emailSender, Clock $clock, UnusualSpendingCalculator $unusualSpendingCalculator)
     {
         $this->emailSender = $emailSender;
         $this->clock = $clock;
-        $this->paymentRepository = $paymentRepository;
+        $this->unusualSpendingCalculator = $unusualSpendingCalculator;
     }
 
     public function trigger(int $userId): void
@@ -66,9 +66,22 @@ The Credit Card Company";
 
     private function getUnusualSpending(int $userId): array
     {
-        return [
-            Category::Restaurants->name => 50.2,
-            Category::Entertainment->name => 150.2,
-        ];
+        return $this
+            ->unusualSpendingCalculator
+            ->getUnusualSpending(
+                $userId,
+                $this->getCurrentMonth(),
+                $this->getPreviousMonth()
+            );
+    }
+
+    private function getCurrentMonth(): int
+    {
+        return $this->clock->getCurrentMonth();
+    }
+
+    private function getPreviousMonth(): int
+    {
+        return $this->clock->getPreviousMonth();
     }
 }

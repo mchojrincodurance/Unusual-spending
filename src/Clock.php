@@ -20,4 +20,9 @@ class Clock
     {
         return $this->currentMonth;
     }
+
+    public function getPreviousMonth(): int
+    {
+        return $this->currentMonth -1;
+    }
 }
