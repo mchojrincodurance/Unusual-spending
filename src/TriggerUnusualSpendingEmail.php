@@ -15,7 +15,7 @@ class TriggerUnusualSpendingEmail
 
     public function trigger(int $userId): void
     {
-        $unusualSpending = $this->getUnusualSpending($userId);
+        $unusualSpending = $this->getUnusualSpending(new UserId($userId));
         $this->sendEmail(
             $this->buildEmailSubject(array_sum($unusualSpending)),
             $this->buildEmailBody($unusualSpending)
@@ -64,7 +64,7 @@ The Credit Card Company";
         );
     }
 
-    private function getUnusualSpending(int $userId): array
+    private function getUnusualSpending(UserId $userId): array
     {
         return $this
             ->unusualSpendingCalculator
