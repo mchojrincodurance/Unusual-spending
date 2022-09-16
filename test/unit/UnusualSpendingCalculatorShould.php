@@ -39,7 +39,7 @@ class UnusualSpendingCalculatorShould extends TestCase
         $paymentsMade = [];
 
         foreach ($firstMonthSpend as $category => $spend) {
-            $paymentsMade = new Payment(
+            $paymentsMade[] = new Payment(
                 new Price($spend),
                 new PaymentDescription("A payment"),
                 Category::tryFrom($category)
