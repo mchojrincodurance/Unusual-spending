@@ -8,6 +8,7 @@ class UnusualSpendingCalculatorShould extends TestCase
 {
     private PaymentRepository $paymentRepository;
     private UserId $userId;
+    private UnusualSpendingCalculator $unusualSpendingCalculator;
 
     /**
      * @param array $firstMonthSpend
@@ -21,10 +22,9 @@ class UnusualSpendingCalculatorShould extends TestCase
     {
         $this->buildInitialScenario($firstMonthSpend, $secondMonthSpend);
 
-        $unusualSpendingCalculator = new UnusualSpendingCalculator();
         $this->assertEquals(
             $expectedResult,
-            $unusualSpendingCalculator->getUnusualSpending(1, 1, 0));
+            $this->unusualSpendingCalculator->getUnusualSpending($this->userId, 1, 0));
     }
 
     /**
@@ -92,6 +92,10 @@ class UnusualSpendingCalculatorShould extends TestCase
     {
         $this->userId = new UserId(1);
         $this->paymentRepository = Mockery::mock(PaymentRepository::class);
+        $this->unusualSpendingCalculator = new UnusualSpendingCalculator(
+            $this->paymentRepository,
+            2
+        );
     }
 
     private function spendProvider(): array
