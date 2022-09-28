@@ -1,6 +1,6 @@
 {
-    "name": "mchojrin/katalyst-kickstart-php",
-    "description": "A skeleton for php based solutions to https://katalyst.codurance.com/",
+    "name": "mchojrincodurance/unusual-spending",
+    "description": "A php solution for https://kata-log.rocks/unusual-spending-kata",
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "mockery/mockery": "~1.5.1"
@@ -8,7 +8,7 @@
     "authors": [
         {
             "name": "Mauro Chojrin",
-            "email": "mauro.chojrin@leewayweb.com"
+            "email": "mauro.chojrin@codurance.com"
         }
     ],
     "require": {
