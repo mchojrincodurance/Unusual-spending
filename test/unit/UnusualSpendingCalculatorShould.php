@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 
-class UnusualSpendingCalculatorShould extends TestCase
+class UnusualSpendingCalculatorShould extends MockeryTestCase
 {
     private PaymentRepository $paymentRepository;
     private UserId $userId;

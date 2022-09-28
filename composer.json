@@ -18,5 +18,8 @@
         "psr-4": {
             "" : "src/"
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --test-suffix=Should.php test"
     }
 }
